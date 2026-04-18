@@ -1,0 +1,52 @@
+services:
+  api-gateway:
+    build: ./apps/api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - RELEASE_SERVICE_URL=http://release-service:3001
+      - RULES_SERVICE_URL=http://rules-service:3002
+      - INTEGRATIONS_SERVICE_URL=http://integrations-service:3003
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3004
+    depends_on:
+      - release-service
+      - rules-service
+      - integrations-service
+      - notification-service
+
+  release-service:
+    build: ./apps/release-service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+
+  rules-service:
+    build: ./apps/rules-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+
+  integrations-service:
+    build: ./apps/integrations-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+
+  notification-service:
+    build: ./apps/notification-service
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
+
+  # frontend: WIP — se agrega cuando el backend esté completo
