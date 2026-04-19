@@ -1,11 +1,23 @@
 package com.bancobta.rulesservice.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Solicitud de evaluación de release")
 public class ReleaseRequest {
 
+    @Schema(description = "Tipo de solicitud", example = "rs")
     private String tipo;
+
+    @Schema(description = "Porcentaje de cobertura de tests", example = "85")
     private Integer cobertura;
+
+    @Schema(description = "Descripción del cambio", example = "Agrega módulo de pagos")
     private String descripcion;
+
+    @Schema(description = "URL del PR o ticket de Jira", example = "https://github.com/org/repo/pull/42")
     private String pr_o_jira;
+
+    @Schema(description = "Frameworks del stack separados por coma", example = "Spring Boot 3.2, Node 20")
     private String stack;
 
     public String getTipo() { return tipo; }
