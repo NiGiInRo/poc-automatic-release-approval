@@ -27,7 +27,7 @@ services:
     ports:
       - "3002:3002"
     environment:
-      - PORT=3002
+      - SERVER_PORT=3002
 
   integrations-service:
     build: ./apps/integrations-service
