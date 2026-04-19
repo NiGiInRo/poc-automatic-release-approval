@@ -34,7 +34,7 @@ services:
     ports:
       - "3003:3003"
     environment:
-      - PORT=3003
+      - SERVER_PORT=3003
       - GITHUB_TOKEN=${GITHUB_TOKEN}
 
   notification-service:

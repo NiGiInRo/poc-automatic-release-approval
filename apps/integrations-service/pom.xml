@@ -12,9 +12,9 @@
     </parent>
 
     <groupId>com.app</groupId>
-    <artifactId>rules-service</artifactId>
+    <artifactId>integrations-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>rules-service</name>
+    <name>integrations-service</name>
 
     <properties>
         <java.version>21</java.version>
