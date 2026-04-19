@@ -1,98 +1,99 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# notification-service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Responsabilidad
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Servicio de notificaciones para releases rechazados. Recibe los datos de una solicitud y las reglas que fallaron, y envía un correo HTML al aprobador técnico del equipo. Es llamado por el api-gateway cuando un release tipo `rs` no pasa la evaluación automática.
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Tecnología | Versión | Rol |
+|---|---|---|
+| NestJS | 11 | Framework principal |
+| Nodemailer | 6 | Envío de correos vía SMTP |
+| class-validator | 0.14 | Validación de datos de entrada |
+| @nestjs/swagger | 11 | Documentación interactiva |
+| TypeScript | 5.7 | Lenguaje |
 
-## Project setup
+## Puerto
 
-```bash
-$ npm install
+`3004`
+
+## Endpoints
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/health` | Estado del servicio |
+| `POST` | `/notifications/notify` | Enviar notificación de release fallido |
+
+## Documentación interactiva
+
+Con el servicio corriendo, acceder a:
+
+```
+http://localhost:3004/swagger/docs
 ```
 
-## Compile and run the project
+## Correr el servicio
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+npm run start:dev
 ```
 
-## Run tests
+## Correr pruebas
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm test
 ```
 
-## Deployment
+## Lógica de envío
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+| Situación | Comportamiento |
+|---|---|
+| Sin `SMTP_HOST` configurado | Crea cuenta Ethereal automática y loguea la URL para ver el correo en el navegador |
+| Con `SMTP_HOST` configurado | Usa las credenciales SMTP del entorno (Gmail, SendGrid, SES, etc.) |
+| Error en el envío | Modo degradado — loguea en consola sin romper el servicio |
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Variables de entorno
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+| Variable | Requerida | Descripción |
+|---|---|---|
+| `PORT` | No | Puerto del servidor. Por defecto `3004` |
+| `SMTP_HOST` | No | Host SMTP. Sin él, usa Ethereal automáticamente |
+| `SMTP_PORT` | No | Puerto SMTP. Por defecto `587` |
+| `SMTP_USER` | No | Usuario SMTP |
+| `SMTP_PASS` | No | Contraseña SMTP |
+| `SMTP_FROM` | No | Dirección del remitente. Por defecto `"Release Notifier" <notifier@local>` |
+
+## Ejemplo de request / response
+
+**Notificación enviada:**
+```json
+// Request
+{
+  "equipo": "Equipo Pagos",
+  "aprobadorEmail": "aprobador@empresa.com",
+  "tipo": "rs",
+  "descripcion": "Agrega módulo de pagos",
+  "reglasFallidas": ["cobertura insuficiente (60 < 80)", "PR no encontrado"]
+}
+
+// Response
+{ "enviado": true, "mensaje": "Correo enviado a aprobador@empresa.com" }
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+**Modo degradado (SMTP no disponible):**
+```json
+// Response
+{ "enviado": false, "mensaje": "Modo degradado: correo no enviado, ver logs" }
+```
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+**Body inválido:**
+```json
+// Response — 400 Bad Request
+{
+  "message": ["aprobadorEmail must be an email", "reglasFallidas should not be empty"],
+  "error": "Bad Request",
+  "statusCode": 400
+}
+```
