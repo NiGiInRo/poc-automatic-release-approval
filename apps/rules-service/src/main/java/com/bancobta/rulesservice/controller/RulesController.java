@@ -2,7 +2,7 @@ package com.bancobta.rulesservice.controller;
 
 import com.bancobta.rulesservice.dto.EvaluationResponse;
 import com.bancobta.rulesservice.dto.ReleaseRequest;
-import com.bancobta.rulesservice.dto.RuleResult;
+import com.bancobta.rulesservice.service.RulesService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -11,15 +11,19 @@ import java.util.Map;
 @RequestMapping("/rules")
 public class RulesController {
 
+    private final RulesService rulesService;
+
+    public RulesController(RulesService rulesService) {
+        this.rulesService = rulesService;
+    }
+
+    @GetMapping("/health")
+    public Map<String, String> health() {
+        return Map.of("status", "ok");
+    }
+
     @PostMapping("/evaluate")
     public EvaluationResponse evaluate(@RequestBody ReleaseRequest request) {
-        return new EvaluationResponse(
-            true,
-            Map.of(
-                "cobertura",     new RuleResult(true, "hardcoded - pendiente implementar"),
-                "estructura",    new RuleResult(true, "hardcoded - pendiente implementar"),
-                "obsolescencia", new RuleResult(true, "hardcoded - pendiente implementar")
-            )
-        );
+        return rulesService.evaluate(request);
     }
 }
