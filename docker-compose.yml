@@ -9,11 +9,14 @@ services:
       - RULES_SERVICE_URL=http://rules-service:3002
       - INTEGRATIONS_SERVICE_URL=http://integrations-service:3003
       - NOTIFICATION_SERVICE_URL=http://notification-service:3004
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=poc-realm
     depends_on:
       - release-service
       - rules-service
       - integrations-service
       - notification-service
+      - keycloak
 
   release-service:
     build: ./apps/release-service

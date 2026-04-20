@@ -1,8 +1,9 @@
-<nav class="navbar">
+<nav class="navbar" *ngIf="authService.isLoggedIn()">
   <span class="navbar__brand">Release Approval</span>
   <div class="navbar__links">
     <a routerLink="/list" routerLinkActive="active">Solicitudes</a>
     <a routerLink="/new" routerLinkActive="active">Nueva</a>
+    <button class="logout-btn" (click)="logout()">Cerrar sesión</button>
   </div>
 </nav>
 
