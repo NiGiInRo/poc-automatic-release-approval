@@ -1,0 +1,37 @@
+<section class="list-page fade-in">
+  <div class="list-header">
+    <h2>Solicitudes de release</h2>
+    <a routerLink="/new" class="btn btn-primary">+ Nueva solicitud</a>
+  </div>
+
+  <p *ngIf="loading" class="muted">Cargando...</p>
+  <p *ngIf="error" class="error-msg">{{ error }}</p>
+
+  <div *ngIf="!loading && !error">
+    <!-- Cabecera de columnas -->
+    <div class="table-row table-header">
+      <span class="caption">Fecha</span>
+      <span class="caption">Equipo</span>
+      <span class="caption">Tipo</span>
+      <span class="caption">Estado</span>
+      <span class="caption">Aprobación</span>
+    </div>
+
+    <!-- Filas de datos -->
+    <div
+      *ngFor="let r of releases"
+      class="table-row card-hover"
+    >
+      <span>{{ r.fecha }}</span>
+      <span>{{ r.equipo }}</span>
+      <span class="chip">{{ r.tipo }}</span>
+      <app-status-badge [estado]="r.estado" />
+      <span class="muted">{{ r.aprobacion ?? '—' }}</span>
+    </div>
+
+    <!-- Estado vacío -->
+    <p *ngIf="releases.length === 0" class="muted empty-msg">
+      No hay solicitudes registradas aún.
+    </p>
+  </div>
+</section>

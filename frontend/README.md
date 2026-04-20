@@ -1,59 +1,79 @@
-# ReleasesApp
+# frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.1.
+## Responsabilidad
 
-## Development server
+Interfaz web del sistema de aprobación de releases. Permite a los equipos de desarrollo consultar el historial de solicitudes y crear nuevas. Se comunica exclusivamente con el `api-gateway` en `localhost:3000`.
 
-To start a local development server, run:
+## Stack
 
-```bash
-ng serve
+| Tecnología | Versión | Rol |
+|---|---|---|
+| Angular | 21 | Framework principal |
+| TypeScript | 5.7 | Lenguaje |
+| CSS puro | — | Sistema de diseño propio (dark mode, variables CSS) |
+| nginx | alpine | Servidor de archivos estáticos en producción |
+
+## Puerto
+
+`4200` (desarrollo) / `4200 → 80` (Docker)
+
+## Vistas
+
+| Ruta | Descripción |
+|---|---|
+| `/list` | Tabla de solicitudes de release con estado y tipo de aprobación |
+| `/new` | Formulario para crear una nueva solicitud |
+
+## Estructura de carpetas
+
+```
+src/app/
+├── core/
+│   ├── models/         ← interfaces Release, ReleaseResult
+│   └── services/       ← ReleasesService (HTTP al api-gateway)
+├── shared/
+│   └── components/
+│       └── status-badge/   ← badge APROBADO / PENDIENTE / N/A
+├── pages/
+│   ├── releases-list/  ← vista /list
+│   └── releases-form/  ← vista /new
+└── layout/
+    └── app-layout/     ← navbar + router-outlet
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Correr en desarrollo
 
 ```bash
-ng generate component component-name
+npm install
+npx @angular/cli@21 serve
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+La app queda disponible en `http://localhost:4200`.
+
+> El backend debe estar corriendo en `http://localhost:3000` para que los datos carguen.
+
+## Correr pruebas
 
 ```bash
-ng generate --help
+npx @angular/cli@21 test --watch=false
 ```
 
-## Building
+Cubre el `ReleasesService` con 5 pruebas unitarias usando `HttpClientTestingModule`.
 
-To build the project run:
+## Correr con Docker
+
+Desde la raíz del proyecto:
 
 ```bash
-ng build
+docker-compose up --build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+El frontend se sirve en `http://localhost:4200` mediante nginx.
 
-## Running unit tests
+## Variables de entorno
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+No requiere variables de entorno. La URL del backend está definida directamente en el servicio:
 
-```bash
-ng test
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
+src/app/core/services/releases.service.ts → apiUrl = 'http://localhost:3000/gateway/releases'
 ```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

@@ -49,4 +49,9 @@ services:
       - SMTP_PASS=${SMTP_PASS}
       - SMTP_FROM=${SMTP_FROM}
 
-  # frontend: WIP — se agrega cuando el backend esté completo
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - api-gateway

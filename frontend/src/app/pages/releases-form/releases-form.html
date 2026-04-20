@@ -1,0 +1,87 @@
+<section class="form-page fade-in">
+  <h2>Nueva solicitud de release</h2>
+
+  <!-- Resultado de aprobación -->
+  <div *ngIf="result" class="result-card surface">
+    <p class="caption">Resultado</p>
+    <div class="result-row">
+      <app-status-badge [estado]="result.estado" />
+      <span>{{ result.aprobacion }}</span>
+    </div>
+    <a routerLink="/list" class="btn btn-secondary">Ver todas las solicitudes</a>
+  </div>
+
+  <p *ngIf="error" class="error-msg">{{ error }}</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" *ngIf="!result" novalidate>
+    <div class="form-grid">
+
+      <!-- Fecha -->
+      <div class="field">
+        <label class="caption" for="fecha">Fecha</label>
+        <input id="fecha" type="date" formControlName="fecha" class="input-control" />
+        <span *ngIf="isInvalid('fecha')" class="field-error">Campo requerido</span>
+      </div>
+
+      <!-- Equipo -->
+      <div class="field">
+        <label class="caption" for="equipo">Equipo</label>
+        <input id="equipo" type="text" formControlName="equipo" class="input-control" placeholder="ej: equipo-a" />
+        <span *ngIf="isInvalid('equipo')" class="field-error">Campo requerido</span>
+      </div>
+
+      <!-- Tipo -->
+      <div class="field">
+        <label class="caption" for="tipo">Tipo</label>
+        <select id="tipo" formControlName="tipo" class="input-control">
+          <option value="rs">RS — Release estándar</option>
+          <option value="fx">FX — Fix urgente</option>
+          <option value="cv">CV — Change value</option>
+        </select>
+      </div>
+
+      <!-- Cobertura -->
+      <div class="field">
+        <label class="caption" for="cobertura">Cobertura (%)</label>
+        <input id="cobertura" type="number" formControlName="cobertura" class="input-control" placeholder="0 - 100" min="0" max="100" />
+        <span *ngIf="isInvalid('cobertura')" class="field-error">Debe ser un número entre 0 y 100</span>
+      </div>
+
+      <!-- Stack -->
+      <div class="field">
+        <label class="caption" for="stack">Stack</label>
+        <input id="stack" type="text" formControlName="stack" class="input-control" placeholder="ej: angular, spring" />
+        <span *ngIf="isInvalid('stack')" class="field-error">Campo requerido</span>
+      </div>
+
+      <!-- PR o Jira -->
+      <div class="field">
+        <label class="caption" for="pr_o_jira">PR / Jira</label>
+        <input id="pr_o_jira" type="text" formControlName="pr_o_jira" class="input-control" placeholder="ej: JIRA-123" />
+        <span *ngIf="isInvalid('pr_o_jira')" class="field-error">Campo requerido</span>
+      </div>
+
+      <!-- Email aprobador (fila completa) -->
+      <div class="field field--full">
+        <label class="caption" for="aprobadorEmail">Email del aprobador</label>
+        <input id="aprobadorEmail" type="email" formControlName="aprobadorEmail" class="input-control" placeholder="aprobador@empresa.com" />
+        <span *ngIf="isInvalid('aprobadorEmail')" class="field-error">Email inválido</span>
+      </div>
+
+      <!-- Descripción (fila completa) -->
+      <div class="field field--full">
+        <label class="caption" for="descripcion">Descripción</label>
+        <textarea id="descripcion" formControlName="descripcion" class="input-control" rows="3" placeholder="Describe brevemente el alcance del release"></textarea>
+        <span *ngIf="isInvalid('descripcion')" class="field-error">Campo requerido</span>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+      <a routerLink="/list" class="btn btn-secondary">Cancelar</a>
+      <button type="submit" class="btn btn-primary" [disabled]="submitting">
+        {{ submitting ? 'Enviando...' : 'Solicitar aprobación' }}
+      </button>
+    </div>
+  </form>
+</section>

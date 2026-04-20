@@ -1,0 +1,59 @@
+.form-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.form-page h2 {
+  font-size: var(--font-size-h2);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+.field-error {
+  font-size: var(--font-size-caption);
+  color: var(--color-alert-soft);
+}
+
+textarea.input-control {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--border-default);
+}
+
+.result-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: 1.05rem;
+}
+
+.error-msg {
+  color: var(--color-alert-soft);
+}
