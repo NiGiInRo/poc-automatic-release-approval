@@ -1,0 +1,35 @@
+.list-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.list-header h2 {
+  font-size: var(--font-size-h2);
+}
+
+.table-row {
+  grid-template-columns: 1fr 1fr 0.6fr 1fr 2fr;
+}
+
+.table-header {
+  background: transparent;
+  border-color: transparent;
+  padding-bottom: 0;
+}
+
+.error-msg {
+  color: var(--color-alert-soft);
+}
+
+.empty-msg {
+  text-align: center;
+  padding: var(--space-8) 0;
+}
