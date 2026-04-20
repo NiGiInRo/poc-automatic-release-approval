@@ -1,6 +1,6 @@
-import { IsString, IsNotEmpty, IsEnum, IsNumber, Min, Max } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { TipoRelease } from './release.entity';
+import { IsString, IsNotEmpty, IsEnum, IsNumber, Min, Max, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { TipoRelease, EstadoRelease, AprobacionRelease } from './release.entity';
 
 export class CreateReleaseDto {
   @ApiProperty({ example: '2026-04-18' })
@@ -37,4 +37,14 @@ export class CreateReleaseDto {
   @IsString()
   @IsNotEmpty()
   stack: string;
+
+  @ApiPropertyOptional({ enum: EstadoRelease })
+  @IsOptional()
+  @IsEnum(EstadoRelease)
+  estado?: EstadoRelease;
+
+  @ApiPropertyOptional({ enum: AprobacionRelease })
+  @IsOptional()
+  @IsEnum(AprobacionRelease)
+  aprobacion?: AprobacionRelease;
 }
