@@ -16,8 +16,8 @@ export class ReleasesService {
 
     const release = this.releasesRepository.create({
       ...dto,
-      estado: isFxOrCv ? EstadoRelease.APROBADO : EstadoRelease.PENDIENTE,
-      aprobacion: isFxOrCv ? AprobacionRelease.NA : AprobacionRelease.MANUAL,
+      estado: dto.estado ?? (isFxOrCv ? EstadoRelease.APROBADO : EstadoRelease.PENDIENTE),
+      aprobacion: dto.aprobacion ?? (isFxOrCv ? AprobacionRelease.NA : AprobacionRelease.MANUAL),
     });
 
     return this.releasesRepository.save(release);
