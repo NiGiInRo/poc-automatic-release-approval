@@ -1,0 +1,108 @@
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: linear-gradient(165deg, rgb(168 85 247 / 0.05), rgb(24 24 27 / 0.95));
+  border: var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  animation: fadeInUp 260ms ease;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: var(--space-7);
+}
+
+.login-header h1 {
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  color: var(--color-primary-soft);
+  margin-bottom: var(--space-2);
+}
+
+.login-header p {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.field label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.field input {
+  width: 100%;
+  min-height: 2.6rem;
+  border-radius: var(--radius-md);
+  border: var(--border-default);
+  background: rgb(24 24 27 / 0.88);
+  padding: 0.55rem 0.8rem;
+  color: var(--color-text-primary);
+  transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
+  box-sizing: border-box;
+}
+
+.field input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.field input:focus {
+  outline: none;
+  border-color: rgb(124 58 237 / 0.6);
+  box-shadow: var(--focus-ring);
+}
+
+.error {
+  background: rgb(239 68 68 / 0.1);
+  color: var(--color-alert-soft);
+  border: 1px solid rgb(239 68 68 / 0.3);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.8rem;
+  font-size: 0.875rem;
+  margin-bottom: var(--space-4);
+}
+
+button[type='submit'] {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--motion-fast), transform var(--motion-fast);
+}
+
+button[type='submit']:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+button[type='submit']:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button[type='submit']:disabled {
+  background: transparent;
+  color: var(--color-disabled);
+  border-color: var(--color-disabled);
+  cursor: not-allowed;
+}

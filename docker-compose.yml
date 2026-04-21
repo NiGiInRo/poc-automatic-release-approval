@@ -9,11 +9,14 @@ services:
       - RULES_SERVICE_URL=http://rules-service:3002
       - INTEGRATIONS_SERVICE_URL=http://integrations-service:3003
       - NOTIFICATION_SERVICE_URL=http://notification-service:3004
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=poc-realm
     depends_on:
       - release-service
       - rules-service
       - integrations-service
       - notification-service
+      - keycloak
 
   release-service:
     build: ./apps/release-service
@@ -48,6 +51,28 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
       - SMTP_FROM=${SMTP_FROM}
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+
+  keycloak-setup:
+    image: quay.io/keycloak/keycloak:24.0
+    entrypoint: ["/bin/bash", "/opt/setup.sh"]
+    volumes:
+      - ./keycloak/setup.sh:/opt/setup.sh
+    environment:
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    depends_on:
+      - keycloak
+    restart: "no"
 
   frontend:
     build: ./frontend
