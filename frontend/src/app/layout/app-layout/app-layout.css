@@ -38,6 +38,22 @@
   color: var(--color-text-primary);
 }
 
+.logout-btn {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #f5f5f5;
+  color: var(--color-text-primary);
+}
+
 .page-content {
   margin-top: var(--navbar-height);
   padding: var(--space-7);

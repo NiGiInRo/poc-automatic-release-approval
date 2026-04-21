@@ -12,6 +12,7 @@ async function bootstrap() {
     .setTitle('API Gateway')
     .setDescription('Punto de entrada único para el flujo de aprobación de releases')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger/docs', app, document);

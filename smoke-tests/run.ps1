@@ -3,9 +3,11 @@
 #
 # Uso: .\smoke-tests\run.ps1
 
-$BASE_URL = "http://localhost:3000"
-$PASSED = 0
-$FAILED = 0
+$BASE_URL      = "http://localhost:3000"
+$KEYCLOAK_URL  = "http://localhost:8080"
+$REALM         = "poc-realm"
+$PASSED        = 0
+$FAILED        = 0
 
 function Print-Header($text) {
     Write-Host ""
@@ -26,9 +28,28 @@ function Assert-Field($response, $field, $expected, $testName) {
 }
 
 # ─────────────────────────────────────────────
-# SMOKE TEST 1: Health check del gateway
+# OBTENER TOKEN DE KEYCLOAK
 # ─────────────────────────────────────────────
-Print-Header "SMOKE TEST 1: Health check"
+Print-Header "Obteniendo token de Keycloak"
+try {
+    $tokenResponse = Invoke-RestMethod -Method Post `
+        -Uri "$KEYCLOAK_URL/realms/$REALM/protocol/openid-connect/token" `
+        -ContentType "application/x-www-form-urlencoded" `
+        -Body "grant_type=password&client_id=poc-client&username=dev&password=dev123"
+
+    $TOKEN   = $tokenResponse.access_token
+    $headers = @{ Authorization = "Bearer $TOKEN" }
+    Write-Host "[OK] Token obtenido correctamente" -ForegroundColor Green
+} catch {
+    Write-Host "[ERROR] No se pudo obtener el token: $_" -ForegroundColor Red
+    Write-Host "        Verificar que Keycloak este corriendo en $KEYCLOAK_URL" -ForegroundColor Yellow
+    exit 1
+}
+
+# ─────────────────────────────────────────────
+# SMOKE TEST 1: Health check (sin token - debe pasar igual)
+# ─────────────────────────────────────────────
+Print-Header "SMOKE TEST 1: Health check (publico, sin token)"
 try {
     $res = Invoke-RestMethod -Uri "$BASE_URL/health" -Method GET
     Write-Host "[PASS] Gateway responde: status=$($res.status)" -ForegroundColor Green
@@ -39,9 +60,28 @@ try {
 }
 
 # ─────────────────────────────────────────────
-# SMOKE TEST 2: fx pasa directo sin evaluar
+# SMOKE TEST 2: Sin token -> 401
 # ─────────────────────────────────────────────
-Print-Header "SMOKE TEST 2: Hot Fix (fx) -> APROBADO / N/A"
+Print-Header "SMOKE TEST 2: Request sin token -> 401 Unauthorized"
+try {
+    Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method GET
+    Write-Host "[FAIL] Debio retornar 401 pero retorno 2xx" -ForegroundColor Red
+    $FAILED++
+} catch {
+    $statusCode = $_.Exception.Response.StatusCode.value__
+    if ($statusCode -eq 401) {
+        Write-Host "[PASS] Retorno 401 Unauthorized correctamente" -ForegroundColor Green
+        $PASSED++
+    } else {
+        Write-Host "[FAIL] Retorno $statusCode (esperado: 401)" -ForegroundColor Red
+        $FAILED++
+    }
+}
+
+# ─────────────────────────────────────────────
+# SMOKE TEST 3: fx pasa directo sin evaluar
+# ─────────────────────────────────────────────
+Print-Header "SMOKE TEST 3: Hot Fix (fx) -> APROBADO / N/A"
 $body = @{
     fecha         = "2026-04-20"
     equipo        = "Equipo Alpha"
@@ -54,18 +94,18 @@ $body = @{
 } | ConvertTo-Json
 
 try {
-    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method POST -Body $body -ContentType "application/json"
-    Assert-Field $res "estado"    "APROBADO" "fx directo"
-    Assert-Field $res "aprobacion" "N/A"     "fx directo"
+    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method POST -Body $body -ContentType "application/json" -Headers $headers
+    Assert-Field $res "estado"     "APROBADO" "fx directo"
+    Assert-Field $res "aprobacion" "N/A"      "fx directo"
 } catch {
-    Write-Host "[FAIL] Error en smoke test 2: $_" -ForegroundColor Red
+    Write-Host "[FAIL] Error en smoke test 3: $_" -ForegroundColor Red
     $FAILED++
 }
 
 # ─────────────────────────────────────────────
-# SMOKE TEST 3: cv pasa directo sin evaluar
+# SMOKE TEST 4: cv pasa directo sin evaluar
 # ─────────────────────────────────────────────
-Print-Header "SMOKE TEST 3: Ciclo de Vida (cv) -> APROBADO / N/A"
+Print-Header "SMOKE TEST 4: Ciclo de Vida (cv) -> APROBADO / N/A"
 $body = @{
     fecha         = "2026-04-20"
     equipo        = "Equipo Beta"
@@ -78,18 +118,18 @@ $body = @{
 } | ConvertTo-Json
 
 try {
-    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method POST -Body $body -ContentType "application/json"
-    Assert-Field $res "estado"    "APROBADO" "cv directo"
-    Assert-Field $res "aprobacion" "N/A"     "cv directo"
+    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method POST -Body $body -ContentType "application/json" -Headers $headers
+    Assert-Field $res "estado"     "APROBADO" "cv directo"
+    Assert-Field $res "aprobacion" "N/A"      "cv directo"
 } catch {
-    Write-Host "[FAIL] Error en smoke test 3: $_" -ForegroundColor Red
+    Write-Host "[FAIL] Error en smoke test 4: $_" -ForegroundColor Red
     $FAILED++
 }
 
 # ─────────────────────────────────────────────
-# SMOKE TEST 4: rs que pasa las 3 reglas -> APROBADO / AUTOMATICA
+# SMOKE TEST 5: rs que pasa las 3 reglas -> APROBADO / AUTOMATICA
 # ─────────────────────────────────────────────
-Print-Header "SMOKE TEST 4: Release (rs) todas las reglas pasan -> APROBADO / AUTOMATICA"
+Print-Header "SMOKE TEST 5: Release (rs) todas las reglas pasan -> APROBADO / AUTOMATICA"
 $body = @{
     fecha         = "2026-04-20"
     equipo        = "Equipo Gamma"
@@ -102,18 +142,18 @@ $body = @{
 } | ConvertTo-Json
 
 try {
-    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method POST -Body $body -ContentType "application/json"
-    Assert-Field $res "estado"    "APROBADO"   "rs aprobado automatico"
+    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method POST -Body $body -ContentType "application/json" -Headers $headers
+    Assert-Field $res "estado"     "APROBADO"   "rs aprobado automatico"
     Assert-Field $res "aprobacion" "AUTOMATICA" "rs aprobado automatico"
 } catch {
-    Write-Host "[FAIL] Error en smoke test 4: $_" -ForegroundColor Red
+    Write-Host "[FAIL] Error en smoke test 5: $_" -ForegroundColor Red
     $FAILED++
 }
 
 # ─────────────────────────────────────────────
-# SMOKE TEST 5: rs con cobertura baja -> PENDIENTE / MANUAL
+# SMOKE TEST 6: rs con cobertura baja -> PENDIENTE / MANUAL
 # ─────────────────────────────────────────────
-Print-Header "SMOKE TEST 5: Release (rs) cobertura insuficiente -> PENDIENTE / MANUAL"
+Print-Header "SMOKE TEST 6: Release (rs) cobertura insuficiente -> PENDIENTE / MANUAL"
 $body = @{
     fecha         = "2026-04-20"
     equipo        = "Equipo Delta"
@@ -126,18 +166,18 @@ $body = @{
 } | ConvertTo-Json
 
 try {
-    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method POST -Body $body -ContentType "application/json"
-    Assert-Field $res "estado"    "PENDIENTE" "rs cobertura baja"
-    Assert-Field $res "aprobacion" "MANUAL"   "rs cobertura baja"
+    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method POST -Body $body -ContentType "application/json" -Headers $headers
+    Assert-Field $res "estado"     "PENDIENTE" "rs cobertura baja"
+    Assert-Field $res "aprobacion" "MANUAL"    "rs cobertura baja"
 } catch {
-    Write-Host "[FAIL] Error en smoke test 5: $_" -ForegroundColor Red
+    Write-Host "[FAIL] Error en smoke test 6: $_" -ForegroundColor Red
     $FAILED++
 }
 
 # ─────────────────────────────────────────────
-# SMOKE TEST 6: rs sin descripcion -> 400 Bad Request
+# SMOKE TEST 7: rs sin descripcion -> 400 Bad Request
 # ─────────────────────────────────────────────
-Print-Header "SMOKE TEST 6: Validacion DTO -> 400 Bad Request si falta descripcion"
+Print-Header "SMOKE TEST 7: Validacion DTO -> 400 Bad Request si falta descripcion"
 $body = @{
     fecha         = "2026-04-20"
     equipo        = "Equipo Epsilon"
@@ -149,7 +189,7 @@ $body = @{
 } | ConvertTo-Json
 
 try {
-    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method POST -Body $body -ContentType "application/json"
+    Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method POST -Body $body -ContentType "application/json" -Headers $headers
     Write-Host "[FAIL] Debio retornar 400 pero retorno 2xx" -ForegroundColor Red
     $FAILED++
 } catch {
@@ -164,11 +204,11 @@ try {
 }
 
 # ─────────────────────────────────────────────
-# SMOKE TEST 7: Listado de solicitudes
+# SMOKE TEST 8: Listado de solicitudes
 # ─────────────────────────────────────────────
-Print-Header "SMOKE TEST 7: GET /gateway/releases -> lista todas las solicitudes"
+Print-Header "SMOKE TEST 8: GET /gateway/releases -> lista todas las solicitudes"
 try {
-    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method GET
+    $res = Invoke-RestMethod -Uri "$BASE_URL/gateway/releases" -Method GET -Headers $headers
     if ($res.Count -ge 4) {
         Write-Host "[PASS] Lista retorna $($res.Count) solicitudes" -ForegroundColor Green
         $PASSED++
@@ -177,7 +217,7 @@ try {
         $FAILED++
     }
 } catch {
-    Write-Host "[FAIL] Error en smoke test 7: $_" -ForegroundColor Red
+    Write-Host "[FAIL] Error en smoke test 8: $_" -ForegroundColor Red
     $FAILED++
 }
 

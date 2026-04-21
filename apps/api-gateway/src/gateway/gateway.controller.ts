@@ -1,9 +1,10 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
-import { ApiOperation, ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiBody, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { GatewayService } from './gateway.service';
 import { CreateReleaseDto } from './dto/create-release.dto';
 
 @ApiTags('gateway')
+@ApiBearerAuth()
 @Controller('gateway')
 export class GatewayController {
   constructor(private readonly gatewayService: GatewayService) {}
